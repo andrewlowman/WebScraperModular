@@ -31,6 +31,7 @@ public class Main extends JFrame {
     private JButton loadPreviousSessionButton;
     private JComboBox deptComboBox;
     private JButton exitButton;
+    private JButton oneDepartmentButton;
 
     private File excelFile = null;
     private ArrayList<String> departments;
@@ -246,7 +247,7 @@ public class Main extends JFrame {
                         do {
 
                             try {
-                                loopThroughEmployees(employeeNumber, counter, deptName);
+                                loopThroughEmployees(employeeNumber + 1, counter, deptName);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
@@ -282,7 +283,7 @@ public class Main extends JFrame {
                         do {
 
                             try {
-                                loopThroughEmployees(employeeNumber, counter, deptName);
+                                loopThroughEmployees(0, counter, deptName);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
@@ -377,6 +378,59 @@ public class Main extends JFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 System.exit(0);
             }
+        });
+
+        oneDepartmentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(ifExcelLoaded){
+
+                        //counter for what page of results for depts is on
+                        int ctr = 0;
+
+                        //for loop
+                        boolean good = true;
+
+                        //loop through all the pages of the department
+                        do{
+
+                            //loop through employees on one page
+                            try {
+                                loopThroughEmployees(0,ctr, "N/A");
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            //check if the arrows for another page of results are present
+                            boolean isPresent = driver.findElements(By.id("DataTables_Table_0_next")).size() > 0;
+
+                            if(isPresent){
+                                WebElement nextPageArrow =  driver.findElement(By.id("DataTables_Table_0_next"));
+
+                                boolean nextPageIsNotPresent = driver.findElements(By.xpath("//a[@class='fg-button ui-button ui-state-default next ui-state-disabled']")).size() > 0;
+
+                                if(!nextPageIsNotPresent){
+                                    nextPageArrow.click();
+                                    ctr++;
+                                }else{
+                                    good = false;
+                                }
+
+                            }else{
+                                //driver.get("https://itsweb.ucsd.edu/directory/search");
+                                good =false;
+                            }
+
+                        }while(good);
+
+                        driver.navigate().back();
+
+                        //need to clear form
+                        WebElement clearButton = driver.findElement(By.id("resetme"));
+
+                        clearButton.click();
+                    }
+                }
         });
     }
 
